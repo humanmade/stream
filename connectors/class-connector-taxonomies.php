@@ -125,7 +125,7 @@ class Connector_Taxonomies extends Connector {
 	public function registered_taxonomy( $taxonomy, $object_type, $args ) {
 		unset( $object_type );
 
-		$taxonomy_obj = (object) $args;
+		$taxonomy_obj = get_taxonomy( $taxonomy );
 		$label        = get_taxonomy_labels( $taxonomy_obj )->singular_name;
 
 		$this->context_labels[ $taxonomy ] = $label;
