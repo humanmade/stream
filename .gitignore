@@ -9,6 +9,3 @@ package.lock
 /node_modules/
 npm-debug.log
 
-# Compiled files
-ui/js/*.min.js
-ui/css/*.min.css
