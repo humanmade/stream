@@ -4,6 +4,7 @@ namespace WP_Stream;
 class Uninstall {
 	/**
 	 * Hold Plugin class
+	 *
 	 * @var Plugin
 	 */
 	public $plugin;
@@ -66,7 +67,7 @@ class Uninstall {
 
 		// Drop everything on single site installs or when network activated
 		// Otherwise only delete data relative to the current blog
-		if ( ! is_multisite() || is_plugin_active_for_network( $this->plugin->locations['plugin'] ) ) {
+		if ( ! is_multisite() || $this->plugin->is_network_activated() ) {
 			$this->delete_all_records();
 			$this->delete_all_options();
 			$this->delete_all_user_meta();
