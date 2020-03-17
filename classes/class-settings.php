@@ -10,6 +10,7 @@ class Settings {
 
 	/**
 	 * Hold Plugin class
+	 *
 	 * @var Plugin
 	 */
 	public $plugin;
@@ -58,15 +59,19 @@ class Settings {
 
 		// Remove records when records TTL is shortened
 		add_action(
-			'update_option_' . $this->option_key, array(
+			'update_option_' . $this->option_key,
+			array(
 				$this,
 				'updated_option_ttl_remove_records',
-			), 10, 2
+			),
+			10,
+			2
 		);
 
 		// Apply label translations for settings
 		add_filter(
-			'wp_stream_serialized_labels', array(
+			'wp_stream_serialized_labels',
+			array(
 				$this,
 				'get_settings_translations',
 			)
@@ -108,10 +113,13 @@ class Settings {
 		);
 
 		add_filter(
-			'user_search_columns', array(
+			'user_search_columns',
+			array(
 				$this,
 				'add_display_name_search_columns',
-			), 10, 3
+			),
+			10,
+			3
 		);
 
 		$users = new WP_User_Query(
@@ -129,10 +137,12 @@ class Settings {
 		);
 
 		remove_filter(
-			'user_search_columns', array(
+			'user_search_columns',
+			array(
 				$this,
 				'add_display_name_search_columns',
-			), 10
+			),
+			10
 		);
 
 		if ( 0 === $users->get_total() ) {
@@ -371,19 +381,16 @@ class Settings {
 			array_push( $fields['advanced']['fields'], $akismet_tracking );
 		}
 
-		// If WP Cron is enabled, allow Admins to opt-in to WP Cron tracking
-		if ( wp_stream_is_cron_enabled() ) {
-			$wp_cron_tracking = array(
-				'name'        => 'wp_cron_tracking',
-				'title'       => esc_html__( 'WP Cron Tracking', 'stream' ),
-				'type'        => 'checkbox',
-				'desc'        => esc_html__( 'By default, Stream does not track activity performed by WordPress cron events unless you opt-in here. Enabling this is not necessary or recommended for most sites.', 'stream' ),
-				'after_field' => esc_html__( 'Enabled', 'stream' ),
-				'default'     => 0,
-			);
+		$wp_cron_tracking = array(
+			'name'        => 'wp_cron_tracking',
+			'title'       => esc_html__( 'WP Cron Tracking', 'stream' ),
+			'type'        => 'checkbox',
+			'desc'        => esc_html__( 'By default, Stream does not track activity performed by WordPress cron events unless you opt-in here. Enabling this is not necessary or recommended for most sites.', 'stream' ),
+			'after_field' => esc_html__( 'Enabled', 'stream' ),
+			'default'     => 0,
+		);
 
-			array_push( $fields['advanced']['fields'], $wp_cron_tracking );
-		}
+		array_push( $fields['advanced']['fields'], $wp_cron_tracking );
 
 		/**
 		 * Filter allows for modification of options fields
@@ -465,7 +472,9 @@ class Settings {
 		$sections = $this->get_fields();
 
 		register_setting(
-			$this->option_key, $this->option_key, array(
+			$this->option_key,
+			$this->option_key,
+			array(
 				$this,
 				'sanitize_settings',
 			)
@@ -541,12 +550,13 @@ class Settings {
 
 							// Support all values in multidimentional arrays too.
 							array_walk_recursive(
-								$output[ $name ], function ( &$v, $k ) {
-									$v = trim( $v );
+								$output[ $name ],
+								function ( &$v ) {
+									$v = sanitize_text_field( trim( $v ) );
 								}
 							);
 						} else {
-							$output[ $name ] = trim( $input[ $name ] );
+							$output[ $name ] = sanitize_text_field( trim( $input[ $name ] ) );
 						}
 				}
 			}
@@ -832,8 +842,13 @@ class Settings {
 
 				$exclude_rows = array();
 
+				// Account for when no rules have been added yet.
+				if ( ! is_array( $current_value ) ) {
+					$current_value = array();
+				}
+
 				// Prepend an empty row.
-				$current_value['exclude_row'] = array( 'helper' => '' ) + ( isset( $current_value['exclude_row'] ) ? $current_value['exclude_row'] : array() );
+				$current_value['exclude_row'] = ( isset( $current_value['exclude_row'] ) ? $current_value['exclude_row'] : array() ) + array( 'helper' => '' );
 
 				foreach ( $current_value['exclude_row'] as $key => $value ) {
 					// Prepare values.
@@ -878,7 +893,8 @@ class Settings {
 					}
 
 					$author_or_role_input = $form->render_field(
-						'select2', array(
+						'select2',
+						array(
 							'name'    => esc_attr( sprintf( '%1$s[%2$s_%3$s][%4$s][]', $option_key, $section, $name, 'author_or_role' ) ),
 							'options' => $author_or_role_values,
 							'classes' => 'author_or_role',
@@ -923,7 +939,8 @@ class Settings {
 					}
 
 					$connector_or_context_input = $form->render_field(
-						'select2', array(
+						'select2',
+						array(
 							'name'    => esc_attr( sprintf( '%1$s[%2$s_%3$s][%4$s][]', $option_key, $section, $name, 'connector_or_context' ) ),
 							'options' => $context_values,
 							'classes' => 'connector_or_context',
@@ -935,7 +952,8 @@ class Settings {
 					);
 
 					$connector_input = $form->render_field(
-						'hidden', array(
+						'hidden',
+						array(
 							'name'    => esc_attr( sprintf( '%1$s[%2$s_%3$s][%4$s][]', $option_key, $section, $name, 'connector' ) ),
 							'value'   => $connector,
 							'classes' => 'connector',
@@ -943,7 +961,8 @@ class Settings {
 					);
 
 					$context_input = $form->render_field(
-						'hidden', array(
+						'hidden',
+						array(
 							'name'    => esc_attr( sprintf( '%1$s[%2$s_%3$s][%4$s][]', $option_key, $section, $name, 'context' ) ),
 							'value'   => $context,
 							'classes' => 'context',
@@ -961,7 +980,8 @@ class Settings {
 					}
 
 					$action_input = $form->render_field(
-						'select2', array(
+						'select2',
+						array(
 							'name'    => esc_attr( sprintf( '%1$s[%2$s_%3$s][%4$s][]', $option_key, $section, $name, 'action' ) ),
 							'value'   => $action,
 							'options' => $action_values,
@@ -974,7 +994,8 @@ class Settings {
 
 					// IP Address input
 					$ip_address_input = $form->render_field(
-						'select2', array(
+						'select2',
+						array(
 							'name'     => esc_attr( sprintf( '%1$s[%2$s_%3$s][%4$s][]', $option_key, $section, $name, 'ip_address' ) ),
 							'value'    => $ip_address,
 							'classes'  => 'ip_address',
